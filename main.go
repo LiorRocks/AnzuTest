@@ -12,17 +12,17 @@ import (
 const ParquetFilename = "be_test.parquet"
 
 type AppkeyPlatformFormat struct {
-	appkey   string `parquet:"name=appkey, type=BYTE_ARRAY, convertedtype=UTF8"`
-	platform string `parquet:"name=platform, type=BYTE_ARRAY, convertedtype=UTF8"`
-	action   string `parquet:"name=action, type=BYTE_ARRAY, convertedtype=UTF8"`
+	appkey   string `parquet:"name=appkey, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	platform string `parquet:"name=platform, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	action   string `parquet:"name=action, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
 }
 
 type AppkeyPlatformSummary struct {
-	appkey      string `parquet:"name=appkey, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	platform    string `parquet:"name=platform, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	plays       int64  `parquet:"name=plays, type=INT64"`
-	empties     int64  `parquet:"name=empties, type=INT64"`
-	impressions int64  `parquet:"name=impressions, type=INT64"`
+	appkey      string
+	platform    string
+	plays       int64
+	empties     int64
+	impressions int64
 }
 
 var TotalValues map[string]AppkeyPlatformSummary = make(map[string]AppkeyPlatformSummary, 0)
