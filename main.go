@@ -12,9 +12,9 @@ import (
 const ParquetFilename = "be_test.parquet"
 
 type AppkeyPlatformFormat struct {
-	appkey   string `parquet:"name=utf8, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	platform string `parquet:"name=utf8, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
-	action   string `parquet:"name=utf8, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
+	appkey   string `parquet:"name=appkey, type=BYTE_ARRAY, convertedtype=UTF8"`
+	platform string `parquet:"name=platform, type=BYTE_ARRAY, convertedtype=UTF8"`
+	action   string `parquet:"name=action, type=BYTE_ARRAY, convertedtype=UTF8"`
 }
 
 type AppkeyPlatformSummary struct {
@@ -37,7 +37,7 @@ func main() {
 		return
 	}
 
-	pr, err := reader.NewParquetReader(fr, new(AppkeyPlatformFormat), 3)
+	pr, err := reader.NewParquetReader(fr, nil, 3)
 	if err != nil {
 		log.Println("Can't create parquet reader", err)
 		return
@@ -53,7 +53,7 @@ func main() {
 }
 
 func processParquetRow(pr *reader.ParquetReader) {
-	var appkeyPlatformFormat AppkeyPlatformFormat
+	var appkeyPlatformFormat AppkeyPlatformFormat = AppkeyPlatformFormat{}
 	pr.Read(&appkeyPlatformFormat)
 	if val, ok := TotalValues[appkeyPlatformFormat.appkey+appkeyPlatformFormat.platform]; ok {
 		switch appkeyPlatformFormat.action {
