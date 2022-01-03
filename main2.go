@@ -30,10 +30,7 @@ var TotalValues map[string]AppkeyPlatformSummary = make(map[string]AppkeyPlatfor
 var wg = sync.WaitGroup{}
 
 func main() {
-	wt1ch := make(chan []AppkeyPlatformFormat)
-	wt2ch := make(chan []AppkeyPlatformFormat)
-	wt3ch := make(chan []AppkeyPlatformFormat)
-	wt4ch := make(chan []AppkeyPlatformFormat)
+	c := make(chan []AppkeyPlatformFormat)
 
 	var err error
 	fr, err := local.NewLocalFileReader(ParquetFilename)
@@ -49,58 +46,18 @@ func main() {
 	}
 
 	numOfRows := int(pr.GetNumRows())
-	for i := 0; i < 4; i++ {
-		switch i {
-		case 0:
-			{
-				go worker(wt1ch)
-				appKeys1 := make([]AppkeyPlatformFormat, numOfRows/4)
-				initializeEmptyArray(appKeys1, numOfRows/4)
-				if err = pr.Read(&appKeys1); err != nil {
-					log.Println("Read error", err)
-				}
-				wt1ch <- appKeys1
+	numOfChunks := numOfRows / 10000
+	for i := 0; i < numOfChunks; i++ {
+		go worker(c)
+		appKeys1 := make([]AppkeyPlatformFormat, 10000)
 
-				break
-			}
-		case 1:
-			{
-				go worker(wt2ch)
-				appKeys2 := make([]AppkeyPlatformFormat, numOfRows/4)
-				initializeEmptyArray(appKeys2, numOfRows/4)
-				if err = pr.Read(&appKeys2); err != nil {
-					log.Println("Read error", err)
-				}
-				wt2ch <- appKeys2
-
-				break
-			}
-		case 2:
-			{
-				go worker(wt3ch)
-				appKeys3 := make([]AppkeyPlatformFormat, numOfRows/4)
-				initializeEmptyArray(appKeys3, numOfRows/4)
-				if err = pr.Read(&appKeys3); err != nil {
-					log.Println("Read error", err)
-				}
-				wt3ch <- appKeys3
-
-				break
-			}
-		case 3:
-			{
-				go worker(wt1ch)
-				appKeys4 := make([]AppkeyPlatformFormat, numOfRows/4)
-				initializeEmptyArray(appKeys4, numOfRows/4)
-				if err = pr.Read(&appKeys4); err != nil {
-					log.Println("Read error", err)
-				}
-				wt4ch <- appKeys4
-
-				break
-			}
+		if err = pr.Read(&appKeys1); err != nil {
+			log.Println("Read error", err)
 		}
+		c <- appKeys1
+
 	}
+
 	printTotalStats()
 }
 
@@ -109,7 +66,7 @@ func worker(c chan []AppkeyPlatformFormat) {
 	for {
 		data = <-c
 		for _, value := range data {
-			go processParquetRow(value)
+			processParquetRow(value)
 		}
 	}
 }
