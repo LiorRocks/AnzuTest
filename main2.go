@@ -32,6 +32,10 @@ var wg = sync.WaitGroup{}
 func main() {
 	c := make(chan []AppkeyPlatformFormat)
 
+	for i := 0; i < 4; i++ {
+		go worker(c)
+	}
+
 	var err error
 	fr, err := local.NewLocalFileReader(ParquetFilename)
 	if err != nil {
@@ -48,7 +52,6 @@ func main() {
 	numOfRows := int(pr.GetNumRows())
 	numOfChunks := numOfRows / 10000
 	for i := 0; i < numOfChunks; i++ {
-		go worker(c)
 		appKeys1 := make([]AppkeyPlatformFormat, 10000)
 
 		if err = pr.Read(&appKeys1); err != nil {
